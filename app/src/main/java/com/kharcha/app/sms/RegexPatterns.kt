@@ -18,6 +18,12 @@ object RegexPatterns {
         Regex("""([a-zA-Z0-9._-]+@[a-zA-Z]+)""", RegexOption.IGNORE_CASE),
     )
 
+    /** Bank Balance extraction patterns */
+    val BALANCE_PATTERNS = listOf(
+        Regex("""(?:bal|balance|avl bal|available balance|avl limit|limit|available(?: bal| balance)?)\s*(?:is|:|-)?\s*(?:rs\.?|inr\.?)?\s*([\d,]+\.\d{1,2})""", RegexOption.IGNORE_CASE),
+        Regex("""(?:\b(?:bal|balance):?\s*(?:rs\.?|inr\.?)?\s*)([\d,]+\.\d{1,2})\b""", RegexOption.IGNORE_CASE)
+    )
+
     /** Date patterns */
     val DATE_PATTERNS = listOf(
         Regex("""(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})"""),

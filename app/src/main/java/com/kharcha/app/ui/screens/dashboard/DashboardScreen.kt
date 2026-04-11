@@ -103,6 +103,40 @@ fun DashboardScreen(
                 Text(if (state.isSyncing) "Syncing..." else "Sync SMS")
             }
         }
+        
+        // Bank Balances
+        if (state.dashboardData.bankBalances.isNotEmpty()) {
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                state.dashboardData.bankBalances.forEach { balance ->
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                balance.bankName,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                FormatUtils.formatAmount(balance.balance),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         Spacer(Modifier.height(12.dp))
 

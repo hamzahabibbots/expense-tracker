@@ -7,6 +7,11 @@ import androidx.room.Query
 import com.kharcha.app.data.db.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
 
+data class BankBalanceResult(
+    val bankName: String,
+    val balance: Double
+)
+
 data class CategorySpendingResult(
     val categoryId: String,
     val categoryName: String,
@@ -132,6 +137,16 @@ interface TransactionDao {
 
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun getCount(): Int
+
+    @Query("""
+        SELECT bank_name as bankName, balance
+        FROM transactions
+        WHERE balance IS NOT NULL AND bank_name IS NOT NULL AND bank_name != 'Unknown'
+        GROUP BY bank_name
+        HAVING date = MAX(date)
+        ORDER BY date DESC
+    """)
+    suspend fun getLatestBankBalances(): List<BankBalanceResult>
 
     @Query("SELECT * FROM transactions ORDER BY date DESC LIMIT :limit")
     fun observeRecent(limit: Int = 50): Flow<List<TransactionEntity>>

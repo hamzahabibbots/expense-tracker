@@ -60,6 +60,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 val recentTransactions = transactionRepo.getTransactions(startOfMonth, endOfMonth, limit = 100)
                 val (totalSpending, _) = transactionRepo.getTotalSpending(startOfMonth, endOfMonth)
                 val (totalReceived, _) = transactionRepo.getTotalReceived(startOfMonth, endOfMonth)
+                val bankBalances = transactionRepo.getLatestBankBalances()
                 val categories = categoryRepo.getAll()
 
                 val data = DashboardData(
@@ -69,7 +70,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     monthlyComparison = monthlyComparison,
                     recentTransactions = recentTransactions,
                     totalSpending = totalSpending,
-                    totalReceived = totalReceived
+                    totalReceived = totalReceived,
+                    bankBalances = bankBalances
                 )
 
                 val tips = TipEngine.calculateTips(data)

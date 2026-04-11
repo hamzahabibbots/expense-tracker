@@ -10,6 +10,7 @@ data class Transaction(
     val rawSms: String?,
     val sender: String?,
     val type: String, // "DEBIT" or "CREDIT"
+    val balance: Double?, // Account balance if present in SMS
     val createdAt: String
 )
 
@@ -53,6 +54,11 @@ data class MonthlyComparison(
     val isIncrease: Boolean
 )
 
+data class BankAccountBalance(
+    val bankName: String,
+    val balance: Double
+)
+
 data class DashboardData(
     val categorySpending: List<CategorySpending> = emptyList(),
     val dailySpending: List<DailySpending> = emptyList(),
@@ -60,7 +66,8 @@ data class DashboardData(
     val monthlyComparison: MonthlyComparison? = null,
     val recentTransactions: List<Transaction> = emptyList(),
     val totalSpending: Double = 0.0,
-    val totalReceived: Double = 0.0
+    val totalReceived: Double = 0.0,
+    val bankBalances: List<BankAccountBalance> = emptyList()
 )
 
 data class SyncResult(

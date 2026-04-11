@@ -77,6 +77,15 @@ object SmsParser {
         return null
     }
 
+    fun extractBalance(body: String): Double? {
+        for (pattern in RegexPatterns.BALANCE_PATTERNS) {
+            val match = pattern.find(body) ?: continue
+            val balanceStr = match.groupValues[1].replace(",", "")
+            return balanceStr.toDoubleOrNull()
+        }
+        return null
+    }
+
     fun parseSms(sms: SmsMessage): Transaction? {
         val type = RegexPatterns.getTransactionType(sms.body, sms.sender) ?: return null
 
@@ -84,6 +93,7 @@ object SmsParser {
         val merchant = extractMerchant(sms.body) ?: if (type == "CREDIT") "Received" else "Unknown"
         val date = extractDate(sms.body, sms.date)
         val bankName = extractBankName(sms.sender)
+        val balance = extractBalance(sms.body)
         val categoryId = if (type == "CREDIT") "income" else DefaultCategories.suggestCategory(merchant)
 
         return Transaction(
@@ -96,6 +106,7 @@ object SmsParser {
             rawSms = sms.body,
             sender = sms.sender,
             type = type,
+            balance = balance,
             createdAt = Instant.now().toString()
         )
     }
