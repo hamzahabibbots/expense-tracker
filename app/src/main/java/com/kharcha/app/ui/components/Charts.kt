@@ -118,7 +118,8 @@ fun PieChartView(
 @Composable
 fun LineChartView(
     data: List<DailySpending>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isYearly: Boolean = false
 ) {
     if (data.isEmpty()) {
         Box(modifier = modifier.height(200.dp), contentAlignment = Alignment.Center) {
@@ -193,7 +194,7 @@ fun LineChartView(
             .filter { it in data.indices }.distinct()
         labelIndices.forEach { i ->
             Text(
-                text = FormatUtils.formatChartDate(data[i].date),
+                text = FormatUtils.formatChartDate(data[i].date, isYearly),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

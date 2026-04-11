@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+enum class ChartPeriod { WEEKLY, MONTHLY, YEARLY }
+
 data class DashboardUiState(
     val isLoading: Boolean = true,
     val isSyncing: Boolean = false,
@@ -24,7 +26,8 @@ data class DashboardUiState(
     val tips: List<Tip> = emptyList(),
     val quickTip: Tip? = null,
     val categories: List<Category> = emptyList(),
-    val syncResult: SyncResult? = null
+    val syncResult: SyncResult? = null,
+    val chartPeriod: ChartPeriod = ChartPeriod.MONTHLY
 )
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,7 +42,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         viewModelScope.launch {
+            // Setup app base
             categoryRepo.initializeDefaults()
+            // Enforce April 2026 constraint on startup
+            transactionRepo.purgeOldTransactions("2026-04-01")
+            
             loadDashboard()
         }
     }
@@ -54,7 +61,13 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
             try {
                 val categorySpending = transactionRepo.getCategorySpending(startOfMonth, endOfMonth)
-                val dailySpending = transactionRepo.getSpendingTrend(30)
+                
+                val chartData = when (_uiState.value.chartPeriod) {
+                    ChartPeriod.WEEKLY -> transactionRepo.getSpendingTrend(7)
+                    ChartPeriod.MONTHLY -> transactionRepo.getSpendingTrend(30)
+                    ChartPeriod.YEARLY -> transactionRepo.getMonthlySpendingTrend(12)
+                }
+                
                 val topMerchants = transactionRepo.getTopMerchants(5, startOfMonth, endOfMonth)
                 val monthlyComparison = transactionRepo.getMonthlyComparison()
                 val recentTransactions = transactionRepo.getTransactions(startOfMonth, endOfMonth, limit = 100)
@@ -65,7 +78,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
                 val data = DashboardData(
                     categorySpending = categorySpending,
-                    dailySpending = dailySpending,
+                    dailySpending = chartData,
                     topMerchants = topMerchants,
                     monthlyComparison = monthlyComparison,
                     recentTransactions = recentTransactions,
@@ -88,6 +101,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 _uiState.value = _uiState.value.copy(isLoading = false)
             }
         }
+    }
+
+    fun setChartPeriod(period: ChartPeriod) {
+        _uiState.value = _uiState.value.copy(chartPeriod = period)
+        loadDashboard()
     }
 
     fun syncSms() {

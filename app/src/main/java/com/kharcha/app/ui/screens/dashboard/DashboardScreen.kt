@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
 import com.kharcha.app.ui.components.*
 import com.kharcha.app.ui.theme.Teal
 import com.kharcha.app.util.FormatUtils
@@ -198,13 +200,57 @@ fun DashboardScreen(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text(
-                        "30-Day Spending Trend",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Spending Trend",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    
+                    // Chart Period Toggles
+                    Row(
+                        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp)).padding(4.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        val periods = listOf(
+                            ChartPeriod.WEEKLY to "Week",
+                            ChartPeriod.MONTHLY to "Month",
+                            ChartPeriod.YEARLY to "Year"
+                        )
+                        periods.forEach { (period, label) ->
+                            val isSelected = state.chartPeriod == period
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(
+                                        color = if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent,
+                                        shape = RoundedCornerShape(6.dp)
+                                    )
+                                    .padding(vertical = 6.dp)
+                                    .clickable { viewModel.setChartPeriod(period) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
+                    
+                    Spacer(Modifier.height(16.dp))
+                    LineChartView(
+                        data = state.dashboardData.dailySpending,
+                        isYearly = state.chartPeriod == ChartPeriod.YEARLY
                     )
-                    Spacer(Modifier.height(8.dp))
-                    LineChartView(data = state.dashboardData.dailySpending)
                 }
             }
         }

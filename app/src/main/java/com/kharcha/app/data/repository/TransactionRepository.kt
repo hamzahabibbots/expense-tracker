@@ -60,7 +60,7 @@ class TransactionRepository(
 
     suspend fun getSpendingTrend(days: Int = 30): List<DailySpending> {
         val endDate = LocalDate.now()
-        val startDate = endDate.minusDays(days.toLong())
+        val startDate = endDate.minusDays((days - 1).toLong())
         val fmt = DateTimeFormatter.ISO_LOCAL_DATE
 
         val data = getDailySpending(startDate.format(fmt), endDate.format(fmt))
@@ -71,6 +71,25 @@ class TransactionRepository(
             val dateStr = date.format(fmt)
             DailySpending(dateStr, dataMap[dateStr]?.total ?: 0.0)
         }
+    }
+
+    suspend fun getMonthlySpendingTrend(months: Int = 12): List<DailySpending> {
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusMonths((months - 1).toLong()).withDayOfMonth(1)
+        val fmt = DateTimeFormatter.ISO_LOCAL_DATE
+        
+        val data = transactionDao.getMonthlySpendingTrend(startDate.format(fmt))
+        val dataMap = data.associateBy { it.day.take(7) } // year-month
+
+        return (0 until months).map { i ->
+            val date = startDate.plusMonths(i.toLong())
+            val monthStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM"))
+            DailySpending("${monthStr}-01", dataMap[monthStr]?.total ?: 0.0)
+        }
+    }
+    
+    suspend fun purgeOldTransactions(cutoffDate: String) {
+        transactionDao.deleteOlderThan(cutoffDate)
     }
 
     suspend fun getTopMerchants(

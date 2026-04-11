@@ -75,11 +75,15 @@ object FormatUtils {
         }
     }
 
-    /** Chart label: "2/4" */
-    fun formatChartDate(dateString: String): String {
+    /** Chart label: "2/4" or "Jan" if yearly */
+    fun formatChartDate(dateString: String, isYearly: Boolean = false): String {
         return try {
             val d = LocalDate.parse(dateString.take(10))
-            "${d.dayOfMonth}/${d.monthValue}"
+            if (isYearly) {
+                d.format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH))
+            } else {
+                "${d.dayOfMonth}/${d.monthValue}"
+            }
         } catch (_: Exception) {
             ""
         }

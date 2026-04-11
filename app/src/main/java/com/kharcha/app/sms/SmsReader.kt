@@ -26,11 +26,19 @@ class SmsReader(private val context: Context) {
     fun readMessages(since: Long? = null, limit: Int = 500): List<SmsMessage> {
         if (!hasPermission()) return emptyList()
 
+        // Enforce the April 1, 2026 absolute cutoff
+        val cutoffDate = java.time.LocalDate.of(2026, 4, 1)
+            .atStartOfDay(java.time.ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        val actualSince = if (since != null && since > cutoffDate) since else cutoffDate
+
         val messages = mutableListOf<SmsMessage>()
         val uri = Uri.parse("content://sms/inbox")
 
-        val selection = if (since != null) "date > ?" else null
-        val selectionArgs = if (since != null) arrayOf(since.toString()) else null
+        val selection = "date > ?"
+        val selectionArgs = arrayOf(actualSince.toString())
 
         val cursor = context.contentResolver.query(
             uri,

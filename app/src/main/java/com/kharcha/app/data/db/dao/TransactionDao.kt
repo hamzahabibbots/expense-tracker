@@ -138,6 +138,18 @@ interface TransactionDao {
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun getCount(): Int
 
+    @Query("DELETE FROM transactions WHERE date < :cutoffDate")
+    suspend fun deleteOlderThan(cutoffDate: String)
+
+    @Query("""
+        SELECT strftime('%Y-%m', date) || '-01' as day, SUM(amount) as total
+        FROM transactions
+        WHERE date >= :startDate
+        AND type = 'DEBIT'
+        GROUP BY strftime('%Y-%m', date) ORDER BY day ASC
+    """)
+    suspend fun getMonthlySpendingTrend(startDate: String): List<DailySpendingResult>
+
     @Query("""
         SELECT bank_name as bankName, balance
         FROM transactions

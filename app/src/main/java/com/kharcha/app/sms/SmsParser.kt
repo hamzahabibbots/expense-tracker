@@ -92,6 +92,10 @@ object SmsParser {
         val amount = extractAmount(sms.body) ?: return null
         val merchant = extractMerchant(sms.body) ?: if (type == "CREDIT") "Received" else "Unknown"
         val date = extractDate(sms.body, sms.date)
+        
+        // Strict cutoff - April 1, 2026
+        if (date.toLocalDate().isBefore(LocalDate.of(2026, 4, 1))) return null
+
         val bankName = extractBankName(sms.sender)
         val balance = extractBalance(sms.body)
         val categoryId = if (type == "CREDIT") "income" else DefaultCategories.suggestCategory(merchant)
