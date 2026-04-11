@@ -1,11 +1,18 @@
 package com.kharcha.app.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -16,6 +23,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kharcha.app.data.model.CategorySpending
@@ -114,9 +122,9 @@ fun PieChartView(
     }
 }
 
-/** Custom Compose Canvas line chart */
+/** Premium Interactive Compose Bar Chart */
 @Composable
-fun LineChartView(
+fun InteractiveBarChartView(
     data: List<DailySpending>,
     modifier: Modifier = Modifier,
     isYearly: Boolean = false
@@ -128,76 +136,111 @@ fun LineChartView(
         return
     }
 
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    var tapOffset by remember { mutableStateOf(Offset.Zero) }
+
     val maxVal = data.maxOf { it.total }.coerceAtLeast(1.0)
-    val lineColor = Teal
-    val gridColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val barColor = Teal
+    val selectedBarColor = MaterialTheme.colorScheme.primary
+    val gridColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
 
-    Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(start = 8.dp, end = 8.dp, bottom = 24.dp, top = 8.dp)
-    ) {
-        val w = size.width
-        val h = size.height
-        val points = data.mapIndexed { i, d ->
-            val x = if (data.size > 1) (i.toFloat() / (data.size - 1)) * w else w / 2
-            val y = h - (d.total / maxVal * h).toFloat()
-            Offset(x, y)
-        }
+    Column(modifier = modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().height(220.dp)) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 8.dp, end = 8.dp, bottom = 24.dp, top = 20.dp)
+                    .pointerInput(data) {
+                        detectTapGestures { offset ->
+                            val w = size.width.toFloat()
+                            val barWidth = w / (data.size * 1.5f)
+                            val spacing = w / data.size
+                            
+                            val index = (offset.x / spacing).toInt().coerceIn(0, data.size - 1)
+                            val xPos = (index + 0.5f) * spacing
+                            // If tap is near the bar horizontally
+                            if (kotlin.math.abs(offset.x - xPos) < spacing) {
+                                selectedIndex = index
+                                tapOffset = Offset(xPos, offset.y)
+                            } else {
+                                selectedIndex = null
+                            }
+                        }
+                    }
+            ) {
+                val w = size.width
+                val h = size.height
 
-        // Grid lines
-        for (i in 0..3) {
-            val y = h * (i / 3f)
-            drawLine(gridColor, Offset(0f, y), Offset(w, y), strokeWidth = 1f)
-        }
+                // Draw subtle grid lines
+                for (i in 0..3) {
+                    val y = h * (i / 3f)
+                    drawLine(gridColor, Offset(0f, y), Offset(w, y), strokeWidth = 1f)
+                }
 
-        // Line path
-        if (points.size >= 2) {
-            val path = Path().apply {
-                moveTo(points[0].x, points[0].y)
-                for (i in 1 until points.size) {
-                    val prev = points[i - 1]
-                    val curr = points[i]
-                    val cx1 = (prev.x + curr.x) / 2
-                    cubicTo(cx1, prev.y, cx1, curr.y, curr.x, curr.y)
+                val spacing = w / data.size
+                val barWidth = spacing * 0.6f
+
+                // Draw bars
+                data.forEachIndexed { i, d ->
+                    val x = (i + 0.5f) * spacing - (barWidth / 2)
+                    val barHeight = (d.total / maxVal * h).toFloat()
+                    val y = h - barHeight
+                    
+                    val isSelected = selectedIndex == i
+                    val color = if (isSelected) selectedBarColor else barColor.copy(alpha = if (selectedIndex == null) 1f else 0.4f)
+                    
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(x, y),
+                        size = Size(barWidth, barHeight),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx(), 4.dp.toPx())
+                    )
                 }
             }
-            drawPath(path, lineColor, style = Stroke(width = 2.5f, cap = StrokeCap.Round))
 
-            // Gradient fill
-            val fillPath = Path().apply {
-                addPath(path)
-                lineTo(points.last().x, h)
-                lineTo(points.first().x, h)
-                close()
+            // Draw interactive tooltip overlay
+            selectedIndex?.let { idx ->
+                val d = data[idx]
+                Box(
+                    modifier = Modifier
+                        .offset(
+                            x = with(androidx.compose.ui.platform.LocalDensity.current) { tapOffset.x.toDp() } - 60.dp,
+                            y = with(androidx.compose.ui.platform.LocalDensity.current) { tapOffset.y.toDp() } - 40.dp
+                        )
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = FormatUtils.formatChartDate(d.date, isYearly),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = FormatUtils.formatAmount(d.total),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
-            drawPath(fillPath, lineColor.copy(alpha = 0.1f))
         }
 
-        // Dots at data points (every 5th)
-        points.forEachIndexed { i, pt ->
-            if (i % 5 == 0 || i == points.size - 1) {
-                drawCircle(lineColor, 3.5f, pt)
-                drawCircle(Color.White, 1.5f, pt)
+        // X-axis labels
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val labelIndices = listOf(0, data.size / 4, data.size / 2, data.size * 3 / 4, data.size - 1)
+                .filter { it in data.indices }.distinct()
+            labelIndices.forEach { i ->
+                Text(
+                    text = FormatUtils.formatChartDate(data[i].date, isYearly),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-        }
-    }
-
-    // X-axis labels
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        val labelIndices = listOf(0, data.size / 4, data.size / 2, data.size * 3 / 4, data.size - 1)
-            .filter { it in data.indices }.distinct()
-        labelIndices.forEach { i ->
-            Text(
-                text = FormatUtils.formatChartDate(data[i].date, isYearly),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

@@ -264,7 +264,7 @@ fun DashboardScreen(
                     }
                     
                     Spacer(Modifier.height(16.dp))
-                    LineChartView(
+                    InteractiveBarChartView(
                         data = state.dashboardData.dailySpending,
                         isYearly = state.chartPeriod == ChartPeriod.YEARLY
                     )
