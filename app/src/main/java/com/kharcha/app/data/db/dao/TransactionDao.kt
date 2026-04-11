@@ -151,12 +151,15 @@ interface TransactionDao {
     suspend fun getMonthlySpendingTrend(startDate: String): List<DailySpendingResult>
 
     @Query("""
-        SELECT bank_name as bankName, balance
-        FROM transactions
-        WHERE balance IS NOT NULL AND bank_name IS NOT NULL AND bank_name != 'Unknown'
-        GROUP BY bank_name
-        HAVING date = MAX(date)
-        ORDER BY date DESC
+        SELECT t1.bank_name as bankName, t1.balance
+        FROM transactions t1
+        INNER JOIN (
+            SELECT bank_name, MAX(date) as max_date
+            FROM transactions
+            WHERE balance IS NOT NULL AND bank_name IS NOT NULL AND bank_name != 'Unknown'
+            GROUP BY bank_name
+        ) t2 ON t1.bank_name = t2.bank_name AND t1.date = t2.max_date
+        ORDER BY t1.date DESC
     """)
     suspend fun getLatestBankBalances(): List<BankBalanceResult>
 

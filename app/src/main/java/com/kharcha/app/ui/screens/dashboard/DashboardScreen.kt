@@ -56,7 +56,11 @@ fun DashboardScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                val remaining = state.dashboardData.totalReceived - state.dashboardData.totalSpending
+                val remaining = if (state.dashboardData.bankBalances.isNotEmpty()) {
+                    state.dashboardData.bankBalances.sumOf { it.balance }
+                } else {
+                    0.0
+                }
                 Text(
                     "Remaining Balance",
                     style = MaterialTheme.typography.bodyMedium,
