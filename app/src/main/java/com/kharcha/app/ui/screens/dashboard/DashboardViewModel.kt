@@ -149,4 +149,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             }
         }
     }
+
+    fun deleteTransaction(id: String) {
+        viewModelScope.launch {
+            transactionRepo.deleteTransaction(id)
+            loadDashboard()
+        }
+    }
 }

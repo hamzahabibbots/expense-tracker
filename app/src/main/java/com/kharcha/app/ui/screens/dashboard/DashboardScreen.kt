@@ -347,7 +347,8 @@ fun DashboardScreen(
             state.dashboardData.recentTransactions.take(5).forEach { tx ->
                 TransactionCard(
                     transaction = tx,
-                    categories = state.categories
+                    categories = state.categories,
+                    onDelete = { viewModel.deleteTransaction(tx.id) }
                 )
             }
         }

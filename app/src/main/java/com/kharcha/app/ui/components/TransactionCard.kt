@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import com.kharcha.app.data.model.Category
 import com.kharcha.app.data.model.Transaction
 import com.kharcha.app.util.FormatUtils
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 
 @Composable
 fun TransactionCard(
@@ -61,25 +63,39 @@ fun TransactionCard(
                 }
             }
 
-            // Right: Amount + Category
-            Column(horizontalAlignment = Alignment.End) {
-                val isCredit = transaction.type == "CREDIT"
-                Text(
-                    text = "${if (isCredit) "+" else ""}${FormatUtils.formatAmount(transaction.amount)}",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = if (isCredit) com.kharcha.app.ui.theme.Teal else MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.height(4.dp))
-                if (onCategoryClick != null) {
-                    TextButton(
-                        onClick = onCategoryClick,
-                        contentPadding = PaddingValues(0.dp),
-                        modifier = Modifier.height(24.dp)
-                    ) {
+            // Right: Amount + Category + Delete
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(horizontalAlignment = Alignment.End) {
+                    val isCredit = transaction.type == "CREDIT"
+                    Text(
+                        text = "${if (isCredit) "+" else ""}${FormatUtils.formatAmount(transaction.amount)}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (isCredit) com.kharcha.app.ui.theme.Teal else MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    if (onCategoryClick != null) {
+                        TextButton(
+                            onClick = onCategoryClick,
+                            contentPadding = PaddingValues(0.dp),
+                            modifier = Modifier.height(24.dp)
+                        ) {
+                            CategoryBadge(category = category)
+                        }
+                    } else {
                         CategoryBadge(category = category)
                     }
-                } else {
-                    CategoryBadge(category = category)
+                }
+                
+                if (onDelete != null) {
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

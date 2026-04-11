@@ -148,7 +148,8 @@ fun TransactionsScreen(viewModel: TransactionsViewModel = viewModel()) {
                         TransactionCard(
                             transaction = tx,
                             categories = state.categories,
-                            onCategoryClick = { viewModel.openCategorySheet(tx) }
+                            onCategoryClick = { viewModel.openCategorySheet(tx) },
+                            onDelete = { viewModel.deleteTransaction(tx.id) }
                         )
                     }
                 }
