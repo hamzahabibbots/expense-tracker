@@ -9,6 +9,7 @@ data class Transaction(
     val categoryId: String,
     val rawSms: String?,
     val sender: String?,
+    val type: String, // "DEBIT" or "CREDIT"
     val createdAt: String
 )
 
@@ -58,7 +59,8 @@ data class DashboardData(
     val topMerchants: List<MerchantSpending> = emptyList(),
     val monthlyComparison: MonthlyComparison? = null,
     val recentTransactions: List<Transaction> = emptyList(),
-    val totalSpending: Double = 0.0
+    val totalSpending: Double = 0.0,
+    val totalReceived: Double = 0.0
 )
 
 data class SyncResult(

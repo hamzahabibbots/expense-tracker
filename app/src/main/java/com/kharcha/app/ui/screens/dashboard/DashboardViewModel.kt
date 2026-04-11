@@ -59,6 +59,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 val monthlyComparison = transactionRepo.getMonthlyComparison()
                 val recentTransactions = transactionRepo.getTransactions(startOfMonth, endOfMonth, limit = 100)
                 val (totalSpending, _) = transactionRepo.getTotalSpending(startOfMonth, endOfMonth)
+                val (totalReceived, _) = transactionRepo.getTotalReceived(startOfMonth, endOfMonth)
                 val categories = categoryRepo.getAll()
 
                 val data = DashboardData(
@@ -67,7 +68,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     topMerchants = topMerchants,
                     monthlyComparison = monthlyComparison,
                     recentTransactions = recentTransactions,
-                    totalSpending = totalSpending
+                    totalSpending = totalSpending,
+                    totalReceived = totalReceived
                 )
 
                 val tips = TipEngine.calculateTips(data)

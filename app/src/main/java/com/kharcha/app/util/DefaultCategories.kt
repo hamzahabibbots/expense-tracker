@@ -10,6 +10,7 @@ object DefaultCategories {
         Category("health", "Health", "#96CEB4", "medical", true),
         Category("entertainment", "Entertainment", "#FFEAA7", "film", true),
         Category("shopping", "Shopping", "#DDA0DD", "cart", true),
+        Category("income", "Income", "#A8E6CF", "arrow-down", true),
         Category("other", "Other", "#B8B8B8", "ellipsis-horizontal", true),
     )
 

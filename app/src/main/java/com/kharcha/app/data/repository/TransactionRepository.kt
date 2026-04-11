@@ -87,6 +87,11 @@ class TransactionRepository(
         return (result.total ?: 0.0) to result.count
     }
 
+    suspend fun getTotalReceived(startDate: String?, endDate: String?): Pair<Double, Int> {
+        val result = transactionDao.getTotalReceived(startDate, endDate)
+        return (result.total ?: 0.0) to result.count
+    }
+
     suspend fun getMonthlyComparison(): MonthlyComparison {
         val now = LocalDate.now()
         val currentStart = now.withDayOfMonth(1).format(DateTimeFormatter.ISO_LOCAL_DATE) + "T00:00:00"
@@ -131,10 +136,10 @@ class TransactionRepository(
     }
 
     private fun Transaction.toEntity() = TransactionEntity(
-        id, amount, merchant, date, bankName, categoryId, rawSms, sender, createdAt
+        id, amount, merchant, date, bankName, categoryId, rawSms, sender, type, createdAt
     )
 
     private fun TransactionEntity.toDomain() = Transaction(
-        id, amount, merchant, date, bankName, categoryId, rawSms, sender, createdAt
+        id, amount, merchant, date, bankName, categoryId, rawSms, sender, type, createdAt
     )
 }

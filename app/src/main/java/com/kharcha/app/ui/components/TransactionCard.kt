@@ -63,10 +63,11 @@ fun TransactionCard(
 
             // Right: Amount + Category
             Column(horizontalAlignment = Alignment.End) {
+                val isCredit = transaction.type == "CREDIT"
                 Text(
-                    text = FormatUtils.formatAmount(transaction.amount),
+                    text = "${if (isCredit) "+" else ""}${FormatUtils.formatAmount(transaction.amount)}",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = if (isCredit) com.kharcha.app.ui.theme.Teal else MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.height(4.dp))
                 if (onCategoryClick != null) {

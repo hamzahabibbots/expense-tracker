@@ -78,13 +78,13 @@ object SmsParser {
     }
 
     fun parseSms(sms: SmsMessage): Transaction? {
-        if (!RegexPatterns.isDebitSms(sms.body, sms.sender)) return null
+        val type = RegexPatterns.getTransactionType(sms.body, sms.sender) ?: return null
 
         val amount = extractAmount(sms.body) ?: return null
-        val merchant = extractMerchant(sms.body) ?: "Unknown"
+        val merchant = extractMerchant(sms.body) ?: if (type == "CREDIT") "Received" else "Unknown"
         val date = extractDate(sms.body, sms.date)
         val bankName = extractBankName(sms.sender)
-        val categoryId = DefaultCategories.suggestCategory(merchant)
+        val categoryId = if (type == "CREDIT") "income" else DefaultCategories.suggestCategory(merchant)
 
         return Transaction(
             id = generateId(sms),
@@ -95,6 +95,7 @@ object SmsParser {
             categoryId = categoryId,
             rawSms = sms.body,
             sender = sms.sender,
+            type = type,
             createdAt = Instant.now().toString()
         )
     }

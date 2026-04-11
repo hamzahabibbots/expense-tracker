@@ -55,15 +55,27 @@ fun DashboardScreen(
         ) {
             Column {
                 Text(
-                    "Total Spending This Month",
+                    "Spent This Month",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     FormatUtils.formatAmount(state.dashboardData.totalSpending),
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Received",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    FormatUtils.formatAmount(state.dashboardData.totalReceived),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Teal,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 

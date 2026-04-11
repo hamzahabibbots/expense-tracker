@@ -31,5 +31,6 @@ data class TransactionEntity(
     @ColumnInfo(name = "category_id", defaultValue = "other") val categoryId: String,
     @ColumnInfo(name = "raw_sms") val rawSms: String?,
     val sender: String?,
+    @ColumnInfo(defaultValue = "DEBIT") val type: String = "DEBIT",
     @ColumnInfo(name = "created_at") val createdAt: String
 )

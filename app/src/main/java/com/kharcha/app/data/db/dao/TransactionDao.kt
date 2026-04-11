@@ -75,6 +75,7 @@ interface TransactionDao {
         JOIN categories c ON t.category_id = c.id
         WHERE (:startDate IS NULL OR t.date >= :startDate) 
         AND (:endDate IS NULL OR t.date <= :endDate)
+        AND t.type = 'DEBIT'
         GROUP BY c.id ORDER BY total DESC
     """)
     suspend fun getSpendingByCategory(
@@ -86,6 +87,7 @@ interface TransactionDao {
         SELECT date(date) as day, SUM(amount) as total
         FROM transactions
         WHERE date(date) BETWEEN date(:startDate) AND date(:endDate)
+        AND type = 'DEBIT'
         GROUP BY day ORDER BY day ASC
     """)
     suspend fun getDailySpending(startDate: String, endDate: String): List<DailySpendingResult>
@@ -95,6 +97,7 @@ interface TransactionDao {
         FROM transactions
         WHERE (:startDate IS NULL OR date >= :startDate) 
         AND (:endDate IS NULL OR date <= :endDate)
+        AND type = 'DEBIT'
         GROUP BY merchant ORDER BY total DESC LIMIT :limit
     """)
     suspend fun getTopMerchants(
@@ -108,8 +111,21 @@ interface TransactionDao {
         FROM transactions
         WHERE (:startDate IS NULL OR date >= :startDate)
         AND (:endDate IS NULL OR date <= :endDate)
+        AND type = 'DEBIT'
     """)
     suspend fun getTotalSpending(
+        startDate: String? = null,
+        endDate: String? = null
+    ): TotalSpendingResult
+
+    @Query("""
+        SELECT COALESCE(SUM(amount), 0.0) as total, COUNT(*) as count
+        FROM transactions
+        WHERE (:startDate IS NULL OR date >= :startDate)
+        AND (:endDate IS NULL OR date <= :endDate)
+        AND type = 'CREDIT'
+    """)
+    suspend fun getTotalReceived(
         startDate: String? = null,
         endDate: String? = null
     ): TotalSpendingResult

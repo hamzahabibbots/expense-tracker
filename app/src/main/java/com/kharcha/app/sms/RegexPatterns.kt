@@ -60,24 +60,24 @@ object RegexPatterns {
         "total amount due", "payment due", "emi reminder"
     )
 
-    fun isDebitSms(body: String, sender: String?): Boolean {
+    fun getTransactionType(body: String, sender: String?): String? {
         val bodyLower = body.lowercase()
 
         // Check exclusion keywords
-        if (EXCLUDE_KEYWORDS.any { bodyLower.contains(it) }) return false
+        if (EXCLUDE_KEYWORDS.any { bodyLower.contains(it) }) return null
 
         // Check credit keywords
-        if (CREDIT_KEYWORDS.any { bodyLower.contains(it) }) return false
+        if (CREDIT_KEYWORDS.any { bodyLower.contains(it) }) return "CREDIT"
 
         // Check debit keywords
-        if (DEBIT_KEYWORDS.any { bodyLower.contains(it) }) return true
+        if (DEBIT_KEYWORDS.any { bodyLower.contains(it) }) return "DEBIT"
 
-        // If from a bank and has amount, likely a transaction
+        // If from a bank and has amount, we default to DEBIT if it's a known transaction pattern
         if (sender != null) {
             val isBankSender = BANK_SENDER_PATTERNS.values.any { it.containsMatchIn(sender) }
-            if (isBankSender && AMOUNT_PATTERNS.any { it.containsMatchIn(body) }) return true
+            if (isBankSender && AMOUNT_PATTERNS.any { it.containsMatchIn(body) }) return "DEBIT"
         }
 
-        return false
+        return null
     }
 }
