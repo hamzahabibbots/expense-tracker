@@ -54,29 +54,34 @@ fun DashboardScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
+                val remaining = state.dashboardData.totalReceived - state.dashboardData.totalSpending
                 Text(
-                    "Spent This Month",
+                    "Remaining Balance",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    FormatUtils.formatAmount(state.dashboardData.totalSpending),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.error,
+                    FormatUtils.formatAmount(remaining),
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = if (remaining >= 0) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    "Received",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    FormatUtils.formatAmount(state.dashboardData.totalReceived),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Teal,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "↓ ${FormatUtils.formatAmount(state.dashboardData.totalReceived)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Teal,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        "↑ ${FormatUtils.formatAmount(state.dashboardData.totalSpending)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             Button(
