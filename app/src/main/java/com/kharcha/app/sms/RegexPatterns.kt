@@ -41,10 +41,10 @@ object RegexPatterns {
         "PNB" to Regex("""^(?:PNB|PNBSMS|PNBUPI|PNBCC)""", RegexOption.IGNORE_CASE),
         "BOB" to Regex("""^(?:BOB|BOIBNK|BOIIND|BOBUPI)""", RegexOption.IGNORE_CASE),
         "YES" to Regex("""^(?:YESBNK|YESBANK|YESUPI)""", RegexOption.IGNORE_CASE),
-        "INDUSIND" to Regex("""^(?:INDUSB|INDUSIN|INDUPI)""", RegexOption.IGNORE_CASE),
-        "PHONEPE" to Regex("""^PHONEPE""", RegexOption.IGNORE_CASE),
-        "GPAY" to Regex("""^(?:GPAY|GOOGLEP|GPY|TEZ)""", RegexOption.IGNORE_CASE),
-        "PAYTM" to Regex("""^(?:PAYTM|PAYTMB|PAYTMPY)""", RegexOption.IGNORE_CASE),
+        "INDUSIND" to Regex("""INDUS""", RegexOption.IGNORE_CASE),
+        "PHONEPE" to Regex("""PHONEPE""", RegexOption.IGNORE_CASE),
+        "GPAY" to Regex("""(?:GPAY|GOOGLEP|GPY|TEZ)""", RegexOption.IGNORE_CASE),
+        "PAYTM" to Regex("""(?:PAYTM|PAYTMB|PAYTMPY)""", RegexOption.IGNORE_CASE),
     )
 
     val DEBIT_KEYWORDS = listOf(
