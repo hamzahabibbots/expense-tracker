@@ -165,4 +165,12 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions ORDER BY date DESC LIMIT :limit")
     fun observeRecent(limit: Int = 50): Flow<List<TransactionEntity>>
+
+    @Query("""
+        SELECT * FROM transactions 
+        WHERE balance IS NOT NULL AND bank_name != 'Carry Forward'
+        ORDER BY date ASC 
+        LIMIT 1
+    """)
+    suspend fun getEarliestTransactionWithBalance(): TransactionEntity?
 }

@@ -92,6 +92,11 @@ class TransactionRepository(
         transactionDao.deleteOlderThan(cutoffDate)
     }
 
+    suspend fun getEarliestTransactionWithBalance(): Transaction? {
+        val entity = transactionDao.getEarliestTransactionWithBalance()
+        return entity?.toDomain()
+    }
+
     suspend fun getTopMerchants(
         limit: Int = 5,
         startDate: String? = null,

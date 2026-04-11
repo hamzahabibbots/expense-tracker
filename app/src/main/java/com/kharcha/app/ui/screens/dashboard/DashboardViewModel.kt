@@ -135,6 +135,31 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     transactionRepo.addTransactions(mapped)
                 }
 
+                // Automatically calculate and inject carry-forward balance from oldest known message
+                val oldest = transactionRepo.getEarliestTransactionWithBalance()
+                if (oldest != null) {
+                    val exist = transactionRepo.getTransactions(startDate = "2026-04-01T00:00:00", limit = 100)
+                    if (exist.none { it.bankName == "Carry Forward" }) {
+                        val startBal = if (oldest.type == "DEBIT") (oldest.balance ?: 0.0) + oldest.amount else (oldest.balance ?: 0.0) - oldest.amount
+                        if (startBal > 0) {
+                            val carryTx = Transaction(
+                                id = java.util.UUID.randomUUID().toString(),
+                                amount = startBal,
+                                merchant = "Starting Balance",
+                                date = "2026-04-01T00:00:01",
+                                bankName = "Carry Forward",
+                                categoryId = "income",
+                                rawSms = "Auto-calculated from earliest known balance",
+                                sender = "System",
+                                type = "CREDIT",
+                                balance = startBal,
+                                createdAt = java.time.Instant.now().toString()
+                            )
+                            transactionRepo.addTransactions(listOf(carryTx))
+                        }
+                    }
+                }
+
                 _uiState.value = _uiState.value.copy(
                     isSyncing = false,
                     syncResult = SyncResult(true, messages.size, parsed.size, mapped.size)
