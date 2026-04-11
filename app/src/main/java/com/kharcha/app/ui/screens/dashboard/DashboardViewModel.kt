@@ -156,4 +156,24 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             loadDashboard()
         }
     }
+
+    fun addStartingBalance(amount: Double) {
+        viewModelScope.launch {
+            val carryForward = Transaction(
+                id = java.util.UUID.randomUUID().toString(),
+                amount = amount,
+                merchant = "Starting Balance",
+                date = "2026-04-01T00:00:01",
+                bankName = "Carry Forward",
+                categoryId = "income",
+                rawSms = "Starting Balance from previous month",
+                sender = "System",
+                type = "CREDIT",
+                balance = amount,
+                createdAt = java.time.Instant.now().toString()
+            )
+            transactionRepo.addTransactions(listOf(carryForward))
+            loadDashboard()
+        }
+    }
 }

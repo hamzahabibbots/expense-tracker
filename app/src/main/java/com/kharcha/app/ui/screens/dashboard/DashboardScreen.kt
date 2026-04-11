@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.filled.Add
 import com.kharcha.app.ui.components.*
 import com.kharcha.app.ui.theme.Teal
 import com.kharcha.app.util.FormatUtils
@@ -29,6 +31,9 @@ fun DashboardScreen(
     onNavigateTransactions: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
+    
+    var showBalanceDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var balanceInput by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
 
     if (state.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -61,11 +66,23 @@ fun DashboardScreen(
                 } else {
                     0.0
                 }
-                Text(
-                    "Remaining Balance",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Remaining Balance",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    IconButton(
+                        onClick = { showBalanceDialog = true },
+                        modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            androidx.compose.material.icons.Icons.Default.Add,
+                            contentDescription = "Add starting balance",
+                            tint = Teal
+                        )
+                    }
+                }
                 Text(
                     FormatUtils.formatAmount(remaining),
                     style = MaterialTheme.typography.headlineLarge,
@@ -382,5 +399,44 @@ fun DashboardScreen(
         }
 
         Spacer(Modifier.height(32.dp))
+    }
+
+    if (showBalanceDialog) {
+        AlertDialog(
+            onDismissRequest = { showBalanceDialog = false },
+            title = { Text("Set Starting Balance") },
+            text = {
+                Column {
+                    Text("Carry forward your account balance to track math correctly.")
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = balanceInput,
+                        onValueChange = { balanceInput = it },
+                        label = { Text("Amount") },
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val amount = balanceInput.toDoubleOrNull()
+                        if (amount != null) {
+                            viewModel.addStartingBalance(amount)
+                        }
+                        showBalanceDialog = false
+                        balanceInput = ""
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBalanceDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
