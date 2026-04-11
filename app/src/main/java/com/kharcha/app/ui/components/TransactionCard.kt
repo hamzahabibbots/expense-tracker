@@ -12,6 +12,10 @@ import com.kharcha.app.data.model.Transaction
 import com.kharcha.app.util.FormatUtils
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 
 @Composable
 fun TransactionCard(
@@ -22,6 +26,7 @@ fun TransactionCard(
     onDelete: (() -> Unit)? = null,
 ) {
     val category = categories.find { it.id == transaction.categoryId }
+    var showDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -88,7 +93,7 @@ fun TransactionCard(
                 
                 if (onDelete != null) {
                     Spacer(Modifier.width(8.dp))
-                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    IconButton(onClick = { showDialog = true }, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
@@ -99,5 +104,28 @@ fun TransactionCard(
                 }
             }
         }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Delete Transaction") },
+            text = { Text("Are you sure you want to delete this transaction?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        onDelete?.invoke()
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
