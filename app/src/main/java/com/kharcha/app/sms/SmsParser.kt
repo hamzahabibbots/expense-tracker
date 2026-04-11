@@ -87,6 +87,9 @@ object SmsParser {
     }
 
     fun parseSms(sms: SmsMessage): Transaction? {
+        // Restrict to only read/interpret from INDUS chat to filter out spam/fakes
+        if (sms.sender == null || !sms.sender.contains("INDUS", ignoreCase = true)) return null
+
         val type = RegexPatterns.getTransactionType(sms.body, sms.sender) ?: return null
 
         val amount = extractAmount(sms.body) ?: return null
