@@ -20,8 +20,8 @@ object RegexPatterns {
 
     /** Bank Balance extraction patterns */
     val BALANCE_PATTERNS = listOf(
-        Regex("""(?:bal|balance|avl bal|available balance|avl limit|limit|available(?: bal| balance)?)\s*(?:is|:|-)?\s*(?:rs\.?|inr\.?)?\s*([\d,]+\.\d{1,2})""", RegexOption.IGNORE_CASE),
-        Regex("""(?:\b(?:bal|balance):?\s*(?:rs\.?|inr\.?)?\s*)([\d,]+\.\d{1,2})\b""", RegexOption.IGNORE_CASE)
+        Regex("""(?:bal|balance|avl bal|available balance|avl limit|limit|available(?: bal| balance)?)\s*(?:is|:|-)?\s*(?:rs\.?|inr\.?)?\s*([\d,]+(?:\.\d{1,2})?)""", RegexOption.IGNORE_CASE),
+        Regex("""(?:\b(?:bal|balance):?\s*(?:rs\.?|inr\.?)?\s*)([\d,]+(?:\.\d{1,2})?)\b""", RegexOption.IGNORE_CASE)
     )
 
     /** Date patterns */

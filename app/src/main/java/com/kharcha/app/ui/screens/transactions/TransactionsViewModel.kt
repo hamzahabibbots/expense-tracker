@@ -17,7 +17,7 @@ data class TransactionsUiState(
     val isLoading: Boolean = true,
     val transactions: List<Transaction> = emptyList(),
     val categories: List<Category> = emptyList(),
-    val selectedCategoryFilter: String? = null,
+    val selectedFilter: String? = null,
     val showCategorySheet: Boolean = false,
     val selectedTransaction: Transaction? = null
 )
@@ -48,8 +48,8 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun setFilter(categoryId: String?) {
-        _uiState.value = _uiState.value.copy(selectedCategoryFilter = categoryId)
+    fun setFilter(filterId: String?) {
+        _uiState.value = _uiState.value.copy(selectedFilter = filterId)
     }
 
     fun openCategorySheet(transaction: Transaction) {

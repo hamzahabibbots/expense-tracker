@@ -25,10 +25,10 @@ import com.kharcha.app.util.FormatUtils
 fun TransactionsScreen(viewModel: TransactionsViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsState()
 
-    val filtered = if (state.selectedCategoryFilter != null) {
-        state.transactions.filter { it.categoryId == state.selectedCategoryFilter }
-    } else {
-        state.transactions
+    val filtered = when (state.selectedFilter) {
+        null -> state.transactions
+        "RECEIPTS" -> state.transactions.filter { it.type == "CREDIT" }
+        else -> state.transactions.filter { it.categoryId == state.selectedFilter }
     }
 
     // Group by date
@@ -63,7 +63,7 @@ fun TransactionsScreen(viewModel: TransactionsViewModel = viewModel()) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
-                selected = state.selectedCategoryFilter == null,
+                selected = state.selectedFilter == null,
                 onClick = { viewModel.setFilter(null) },
                 label = { Text("All") },
                 colors = FilterChipDefaults.filterChipColors(
@@ -71,16 +71,27 @@ fun TransactionsScreen(viewModel: TransactionsViewModel = viewModel()) {
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-            state.categories.forEach { cat ->
-                FilterChip(
-                    selected = state.selectedCategoryFilter == cat.id,
-                    onClick = { viewModel.setFilter(cat.id) },
-                    label = { Text(cat.name) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = parseColor(cat.color),
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                    )
+            FilterChip(
+                selected = state.selectedFilter == "RECEIPTS",
+                onClick = { viewModel.setFilter("RECEIPTS") },
+                label = { Text("Receipts") },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = parseColor("#A8E6CF"), // Greenish
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                 )
+            )
+            state.categories.forEach { cat ->
+                if (cat.id != "income") { // Skip the default income category since we have Receipts
+                    FilterChip(
+                        selected = state.selectedFilter == cat.id,
+                        onClick = { viewModel.setFilter(cat.id) },
+                        label = { Text(cat.name) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = parseColor(cat.color),
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
             }
         }
 
