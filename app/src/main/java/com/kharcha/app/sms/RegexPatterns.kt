@@ -50,7 +50,7 @@ object RegexPatterns {
     val DEBIT_KEYWORDS = listOf(
         "debited", "deducted", "paid", "spent", "sent", "withdrawn",
         "transaction successful", "payment successful", "money sent",
-        "funds transferred", "purchase", "charged"
+        "funds transferred", "purchase", "charged", "autopay", "auto-pay"
     )
 
     val CREDIT_KEYWORDS = listOf(
