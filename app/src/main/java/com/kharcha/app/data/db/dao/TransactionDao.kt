@@ -156,12 +156,39 @@ interface TransactionDao {
         INNER JOIN (
             SELECT bank_name, MAX(date) as max_date
             FROM transactions
-            WHERE balance IS NOT NULL AND bank_name IS NOT NULL AND bank_name != 'Unknown'
+            WHERE balance IS NOT NULL AND bank_name IS NOT NULL AND bank_name != 'Unknown' AND bank_name != 'Carry Forward'
             GROUP BY bank_name
         ) t2 ON t1.bank_name = t2.bank_name AND t1.date = t2.max_date
         ORDER BY t1.date DESC
     """)
     suspend fun getLatestBankBalances(): List<BankBalanceResult>
+
+    @Query("""
+        SELECT COALESCE(SUM(amount), 0.0) as total, COUNT(*) as count
+        FROM transactions
+        WHERE (:startDate IS NULL OR date >= :startDate)
+        AND (:endDate IS NULL OR date <= :endDate)
+        AND type = 'DEBIT' AND bank_name != 'Carry Forward'
+    """)
+    suspend fun getRealTotalSpending(
+        startDate: String? = null,
+        endDate: String? = null
+    ): TotalSpendingResult
+
+    @Query("""
+        SELECT COALESCE(SUM(amount), 0.0) as total, COUNT(*) as count
+        FROM transactions
+        WHERE (:startDate IS NULL OR date >= :startDate)
+        AND (:endDate IS NULL OR date <= :endDate)
+        AND type = 'CREDIT' AND bank_name != 'Carry Forward'
+    """)
+    suspend fun getRealTotalReceived(
+        startDate: String? = null,
+        endDate: String? = null
+    ): TotalSpendingResult
+
+    @Query("DELETE FROM transactions WHERE bank_name = 'Carry Forward'")
+    suspend fun deleteCarryForward()
 
     @Query("SELECT * FROM transactions ORDER BY date DESC LIMIT :limit")
     fun observeRecent(limit: Int = 50): Flow<List<TransactionEntity>>

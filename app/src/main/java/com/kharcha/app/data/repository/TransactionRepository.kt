@@ -116,6 +116,20 @@ class TransactionRepository(
         return (result.total ?: 0.0) to result.count
     }
 
+    suspend fun getRealTotalSpending(startDate: String?, endDate: String?): Double {
+        val result = transactionDao.getRealTotalSpending(startDate, endDate)
+        return result.total ?: 0.0
+    }
+
+    suspend fun getRealTotalReceived(startDate: String?, endDate: String?): Double {
+        val result = transactionDao.getRealTotalReceived(startDate, endDate)
+        return result.total ?: 0.0
+    }
+
+    suspend fun deleteCarryForward() {
+        transactionDao.deleteCarryForward()
+    }
+
     suspend fun getLatestBankBalances(): List<BankAccountBalance> {
         return transactionDao.getLatestBankBalances().map { 
             BankAccountBalance(it.bankName, it.balance) 
